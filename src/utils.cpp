@@ -1,4 +1,4 @@
-#include "pathfinding/binary_map.hpp"
+#include "pathfinding/utils.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -14,22 +14,35 @@
 namespace pathfinding_utils
 {
 
-BinaryMap::BinaryMap(const std::string filename, const uint8_t free_threshold)
+bool operator==(const Node & lhs, const Node & rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
+
+bool operator!=(const Node & lhs, const Node & rhs) { return !(lhs == rhs); }
+
+// The logic in the operator< function is negated because it is used for a priority queue in the A*
+// algorithm. In the A* algorithm, the node with the lowest f value (the sum of the cost to reach
+// the node and the estimated cost to the goal) is considered the highest priority. Therefore, the
+// nodes are sorted in descending order of f values, which is achieved by using the greater-than
+// operator (>) instead of the less-than operator (<).
+bool operator<(const Node & lhs, const Node & rhs) { return lhs.f > rhs.f; }
+
+OccupancyGrid::OccupancyGrid(const std::string filename, const uint8_t free_threshold)
 {
-  GetMapFromPGM(filename);
-  ThresholdMapValues(free_threshold);
+  GetGridFromPGM(filename);
+  ThresholdValues(free_threshold);
+  std::cout << "Map has been successfully loaded. Size of the map: " << width_ << "x" << height_
+            << std::endl;
 }
 
-BinaryMap::BinaryMap(
+OccupancyGrid::OccupancyGrid(
   std::vector<uint8_t> pixels, const unsigned width, const unsigned height,
   const unsigned max_value)
 : pixels_(std::move(pixels)), width_(width), height_(height), max_value_(max_value)
 {
-  ValidateMapHeader();
-  ValidateMapSize();
+  ValidateHeader();
+  ValidateSize();
 }
 
-void BinaryMap::SaveAsPGM(const std::string filename) const
+void OccupancyGrid::SaveAsPGM(const std::string filename) const
 {
   if (pixels_.size() != width_ * height_) {
     throw std::runtime_error(
@@ -49,13 +62,19 @@ void BinaryMap::SaveAsPGM(const std::string filename) const
   file << max_value_ << "\n";
 
   for (auto & pixel : pixels_) {
-    file << std::hex << pixel;
+    // Invert the pixel value. In .pgm format, 0 represents black and 255 represents white, while in
+    // the OccupancyGrid class, 0 (associated with white color) represents free due to the
+    // definitions of the free and occupied thresholds.
+    uint8_t inverted_pixel = 255 - pixel;
+    file.write(reinterpret_cast<const char *>(&inverted_pixel), sizeof(inverted_pixel));
   }
 
   file.close();
+
+  std::cout << "Map has been successfully saved to: " << filename_with_ext << std::endl;
 }
 
-bool BinaryMap::IsOccupied(int x, int y) const
+bool OccupancyGrid::IsOccupied(int x, int y) const
 {
   if (x < 0 || x >= width_ || y < 0 || y >= height_) {
     throw std::out_of_range("Pixel coordinates out of range");
@@ -63,7 +82,14 @@ bool BinaryMap::IsOccupied(int x, int y) const
   return pixels_[y * width_ + x] != CellOccupancyLevel::FREE;
 }
 
-void BinaryMap::GetMapFromPGM(const std::string & filename)
+void OccupancyGrid::DrawPath(const std::vector<Node> & path, const uint8_t color)
+{
+  for (const auto & node : path) {
+    (*this)(node.x, node.y) = color;
+  }
+}
+
+void OccupancyGrid::GetGridFromPGM(const std::string & filename)
 {
   std::ifstream file(filename, std::ios::binary);
 
@@ -84,29 +110,33 @@ void BinaryMap::GetMapFromPGM(const std::string & filename)
   file >> max_value_;
   file.ignore();  // Ignore the newline character after max. value
 
-  ValidateMapHeader();
+  ValidateHeader();
 
   std::vector<uint8_t> pixels(width_ * height_);
   for (auto & pixel : pixels) {
-    char pgm_data;
-    file.read(&pgm_data, 1);
-    pixel = static_cast<uint8_t>(pgm_data);
+    uint8_t pgm_data;
+    file.read(reinterpret_cast<char *>(&pgm_data), sizeof(pgm_data));
+
+    // Invert the pixel value. In .pgm format, 0 represents black and 255 represents white, while in
+    // the OccupancyGrid class, 0 (associated with white color) represents free due to the
+    // definitions of the free and occupied thresholds.
+    pixel = 255 - pgm_data;
   }
 
   file.close();
 
   pixels_ = std::move(pixels);
-  ValidateMapSize();
+  ValidateSize();
 }
 
-void BinaryMap::ThresholdMapValues(const uint8_t free_threshold)
+void OccupancyGrid::ThresholdValues(const uint8_t free_threshold)
 {
   std::transform(pixels_.begin(), pixels_.end(), pixels_.begin(), [free_threshold](uint8_t pixel) {
     return pixel <= free_threshold ? CellOccupancyLevel::FREE : CellOccupancyLevel::OCCUPIED;
   });
 }
 
-void BinaryMap::ValidateMapHeader() const
+void OccupancyGrid::ValidateHeader() const
 {
   if (width_ <= 0 || height_ <= 0) {
     throw std::runtime_error("Invalid PGM header");
@@ -117,7 +147,7 @@ void BinaryMap::ValidateMapHeader() const
   }
 }
 
-void BinaryMap::ValidateMapSize() const
+void OccupancyGrid::ValidateSize() const
 {
   if (pixels_.size() != width_ * height_) {
     throw std::runtime_error(
@@ -125,7 +155,7 @@ void BinaryMap::ValidateMapSize() const
   }
 }
 
-std::string BinaryMap::EnsurePGMExtension(const std::string & filename) const
+std::string OccupancyGrid::EnsurePGMExtension(const std::string & filename) const
 {
   if (filename.size() >= 4 && filename.compare(filename.size() - 4, 4, ".pgm") == 0) {
     return filename;
