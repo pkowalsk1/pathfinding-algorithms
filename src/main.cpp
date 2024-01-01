@@ -31,21 +31,21 @@ int main(int argc, char * argv[])
 
   AStar a_star = AStar(map, std::make_unique<EuclideanHeuristic>());
   std::vector<Node> path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("results/euclidean_optimal_solution.pgm");
+  a_star.SaveSummaryAsPGM("../results/euclidean_optimal_solution.pgm");
 
   a_star.SetHeuristic(std::make_unique<ManhattanHeuristic>());
   a_star.SetMovementCost(1.0);
   path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("results/manhattan_optimal_solution.pgm");
+  a_star.SaveSummaryAsPGM("../results/manhattan_optimal_solution.pgm");
 
   a_star.AllowNearOptimalSolution(true);
   path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("results/manhattan_near_optimal_solution.pgm");
+  a_star.SaveSummaryAsPGM("../results/manhattan_near_optimal_solution.pgm");
 
   a_star.SetHeuristic(std::make_unique<EuclideanHeuristic>());
   a_star.SetMovementCost(0.7);
   path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("results/euclidean_near_optimal_solution.pgm");
+  a_star.SaveSummaryAsPGM("../results/euclidean_near_optimal_solution.pgm");
 
   return 0;
 }
