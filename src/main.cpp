@@ -49,33 +49,3 @@ int main(int argc, char * argv[])
 
   return 0;
 }
-
-// Map has been successfully loaded. Size of the map: 4633x2403
-
-// Pathfinding A* algorithm has started. It may take some time...
-
-// Pathfinding successful! Goal node has been reached.
-//          - Total execution time:                38557ms
-//          - Total number of nodes inspected:     4634297
-// Map has been successfully saved to: results/euclidean_optimal_solution.pgm
-
-// Pathfinding A* algorithm has started. It may take some time...
-
-// Pathfinding successful! Goal node has been reached.
-//          - Total execution time:                39977ms
-//          - Total number of nodes inspected:     4229139
-// Map has been successfully saved to: results/manhattan_optimal_solution.pgm
-
-// Pathfinding A* algorithm has started. It may take some time...
-
-// Pathfinding successful! Goal node has been reached.
-//          - Total execution time:                17858ms
-//          - Total number of nodes inspected:     801426
-// Map has been successfully saved to: results/manhattan_near_optimal_solution.pgm
-
-// Pathfinding A* algorithm has started. It may take some time...
-
-// Pathfinding successful! Goal node has been reached.
-//          - Total execution time:                27391ms
-//          - Total number of nodes inspected:     891952
-// Map has been successfully saved to: results/euclidean_near_optimal_solution.pgm

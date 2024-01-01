@@ -18,11 +18,6 @@ bool operator==(const Node & lhs, const Node & rhs) { return lhs.x == rhs.x && l
 
 bool operator!=(const Node & lhs, const Node & rhs) { return !(lhs == rhs); }
 
-// The logic in the operator< function is negated because it is used for a priority queue in the A*
-// algorithm. In the A* algorithm, the node with the lowest f value (the sum of the cost to reach
-// the node and the estimated cost to the goal) is considered the highest priority. Therefore, the
-// nodes are sorted in descending order of f values, which is achieved by using the greater-than
-// operator (>) instead of the less-than operator (<).
 bool operator<(const Node & lhs, const Node & rhs) { return lhs.f > rhs.f; }
 
 OccupancyGrid::OccupancyGrid(const std::string filename, const uint8_t free_threshold)
