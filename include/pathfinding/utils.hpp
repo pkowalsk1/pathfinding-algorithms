@@ -75,7 +75,6 @@ bool operator<(const Node & lhs, const Node & rhs);
  */
 enum CellOccupancyLevel : uint8_t {
   FREE = 0,
-  UNKNOWN = 127,
   OCCUPIED = 255,
 };
 
@@ -105,17 +104,17 @@ public:
     const unsigned max_value);
 
   /**
-   * @brief Saves the occupancy grid as a PGM file. The file extension is automatically appended if
-   * it is not provided.
+   * @brief Saves the occupancy grid as a PGM file. The file extension is automatically appended
+   * if it is not provided.
    *
-   * @throws std::runtime_error if unable to open the file or if map size does not match the number
-   * of pixel data
+   * @throws std::runtime_error if unable to open the file or if map size does not match the
+   * number of pixel data
    *
    * @param filename The filename for the saved PGM file.
    *
    * @note The pixel values are inverted before saving. In .pgm format, 0 represents black and 255
-   * represents white, while in the OccupancyGrid class, 0 (associated with white color) represents
-   * free due to the definitions of the free and occupied thresholds.
+   * represents white, while in the OccupancyGrid class, 0 (associated with white color)
+   * represents free due to the definitions of the free and occupied thresholds.
    */
   void SaveAsPGM(const std::string filename) const;
 
@@ -149,38 +148,37 @@ public:
    * @param x The x-coordinate of the pixel.
    * @param y The y-coordinate of the pixel.
    *
-   * @return uint8_t& Reference to the pixel value.
+   * @return uint8_t The pixel value.
+   *
+   * @throws std::out_of_range If the pixel coordinates are out of range.
    */
-  uint8_t & operator()(int x, int y)
+  uint8_t GetPixel(const int x, const int y) const
   {
     if (x < 0 || x >= width_ || y < 0 || y >= height_) {
       throw std::out_of_range("Pixel coordinates out of range");
     }
-    uint8_t & pixel = pixels_[y * width_ + x];
-    if (pixel > max_value_) {
-      throw std::runtime_error("Pixel value is greater than max value");
-    }
-    return pixel;
+    return pixels_[y * width_ + x];
   }
 
   /**
-   * @brief Accesses the pixel value at the specified coordinates (const version).
+   * @brief Sets the pixel value at the specified coordinates.
    *
    * @param x The x-coordinate of the pixel.
    * @param y The y-coordinate of the pixel.
+   * @param value The new pixel value.
    *
-   * @return const uint8_t& Const reference to the pixel value.
+   * @throws std::out_of_range If the pixel coordinates are out of range.
+   * @throws std::runtime_error If the new pixel value is greater than the maximum value.
    */
-  const uint8_t & operator()(int x, int y) const
+  void SetPixel(const int x, const int y, const uint8_t value)
   {
     if (x < 0 || x >= width_ || y < 0 || y >= height_) {
       throw std::out_of_range("Pixel coordinates out of range");
     }
-    const uint8_t & pixel = pixels_[y * width_ + x];
-    if (pixel > max_value_) {
+    if (value > max_value_) {
       throw std::runtime_error("Pixel value is greater than max value");
     }
-    return pixel;
+    pixels_[y * width_ + x] = value;
   }
 
 private:
@@ -195,15 +193,7 @@ private:
    * represents white, while in the OccupancyGrid class, 0 (associated with white color) represents
    * free due to the definitions of the free and occupied thresholds.
    */
-  void GetGridFromPGM(const std::string & filename);
-
-  /**
-   * @brief Thresholds the pixel values based on the free threshold. The pixels with values less
-   * than or equal to the free threshold are considered free. Other pixels are considered occupied.
-   *
-   * @param free_threshold The threshold for free cells.
-   */
-  void ThresholdValues(const uint8_t free_threshold);
+  void GetGridFromPGM(const std::string & filename, const uint8_t free_threshold);
 
   /**
    * @brief Validates the header of the .pgm file (max_value, width, height)
@@ -220,13 +210,33 @@ private:
   void ValidateSize() const;
 
   /**
+   * @brief Thresholds the pixel value based on the free threshold. The pixels with values less
+   * than or equal to the free threshold are considered free. Other pixels are considered
+   * occupied.
+   *
+   * @param free_threshold The threshold for free cells.
+   */
+  static void ThresholdPixelValue(uint8_t & pixel, const uint8_t free_threshold);
+
+  /**
+   * @brief Invert the pixel value.
+   *
+   * In .pgm format, 0 represents black and 255 represents white, while in the OccupancyGrid class,
+   * 0 (associated with white color) represents free due to the definitions of the free and occupied
+   * thresholds.
+   *
+   * @param pixel The pixel value to invert.
+   */
+  static void InvertPixelValue(uint8_t & pixel);
+
+  /**
    * @brief Ensures that the filename has the .pgm extension.
    *
    * @param filename The filename to check.
    *
    * @return std::string The filename with the .pgm extension.
    */
-  std::string EnsurePGMExtension(const std::string & filename) const;
+  static std::string EnsurePGMExtension(const std::string & filename);
 
   unsigned width_;
   unsigned height_;
@@ -247,7 +257,7 @@ public:
    *
    * @return float The calculated heuristic value.
    */
-  virtual float operator()(const Node & start, const Node & end) = 0;
+  virtual float Calculate(const Node & start, const Node & end) = 0;
 };
 
 class ManhattanHeuristic : public Heuristic
@@ -261,7 +271,7 @@ public:
    *
    * @return float The calculated heuristic value.
    */
-  float operator()(const Node & start, const Node & end) override
+  float Calculate(const Node & start, const Node & end) override
   {
     return std::abs(end.x - start.x) + std::abs(end.y - start.y);
   }
@@ -278,7 +288,7 @@ public:
    *
    * @return float The calculated heuristic value.
    */
-  float operator()(const Node & start, const Node & end) override
+  float Calculate(const Node & start, const Node & end) override
   {
     return std::hypot(end.x - start.x, end.y - start.y);
   }

@@ -22,8 +22,8 @@ bool operator<(const Node & lhs, const Node & rhs) { return lhs.f > rhs.f; }
 
 OccupancyGrid::OccupancyGrid(const std::string filename, const uint8_t free_threshold)
 {
-  GetGridFromPGM(filename);
-  ThresholdValues(free_threshold);
+  GetGridFromPGM(filename, free_threshold);
+
   std::cout << "Map has been successfully loaded. Size of the map: " << width_ << "x" << height_
             << std::endl;
 }
@@ -56,12 +56,10 @@ void OccupancyGrid::SaveAsPGM(const std::string filename) const
   file << width_ << " " << height_ << "\n";
   file << max_value_ << "\n";
 
-  for (auto & pixel : pixels_) {
-    // Invert the pixel value. In .pgm format, 0 represents black and 255 represents white, while in
-    // the OccupancyGrid class, 0 (associated with white color) represents free due to the
-    // definitions of the free and occupied thresholds.
-    uint8_t inverted_pixel = 255 - pixel;
-    file.write(reinterpret_cast<const char *>(&inverted_pixel), sizeof(inverted_pixel));
+  for (auto pixel : pixels_) {
+    // Invert pixel to align .pgm (0=black, 255=white) with OccupancyGrid (0=free, 255=occupied)
+    InvertPixelValue(pixel);
+    file.write(reinterpret_cast<const char *>(&pixel), sizeof(pixel));
   }
 
   file.close();
@@ -80,11 +78,11 @@ bool OccupancyGrid::IsOccupied(int x, int y) const
 void OccupancyGrid::DrawPath(const std::vector<Node> & path, const uint8_t color)
 {
   for (const auto & node : path) {
-    (*this)(node.x, node.y) = color;
+    SetPixel(node.x, node.y, color);
   }
 }
 
-void OccupancyGrid::GetGridFromPGM(const std::string & filename)
+void OccupancyGrid::GetGridFromPGM(const std::string & filename, const uint8_t free_threshold)
 {
   std::ifstream file(filename, std::ios::binary);
 
@@ -112,23 +110,17 @@ void OccupancyGrid::GetGridFromPGM(const std::string & filename)
     uint8_t pgm_data;
     file.read(reinterpret_cast<char *>(&pgm_data), sizeof(pgm_data));
 
-    // Invert the pixel value. In .pgm format, 0 represents black and 255 represents white, while in
-    // the OccupancyGrid class, 0 (associated with white color) represents free due to the
-    // definitions of the free and occupied thresholds.
-    pixel = 255 - pgm_data;
+    // Invert pixel to align .pgm (0=black, 255=white) with OccupancyGrid (0=free, 255=occupied)
+    InvertPixelValue(pgm_data);
+    ThresholdPixelValue(pgm_data, free_threshold);
+
+    pixel = pgm_data;
   }
 
   file.close();
 
   pixels_ = std::move(pixels);
   ValidateSize();
-}
-
-void OccupancyGrid::ThresholdValues(const uint8_t free_threshold)
-{
-  std::transform(pixels_.begin(), pixels_.end(), pixels_.begin(), [free_threshold](uint8_t pixel) {
-    return pixel <= free_threshold ? CellOccupancyLevel::FREE : CellOccupancyLevel::OCCUPIED;
-  });
 }
 
 void OccupancyGrid::ValidateHeader() const
@@ -150,7 +142,14 @@ void OccupancyGrid::ValidateSize() const
   }
 }
 
-std::string OccupancyGrid::EnsurePGMExtension(const std::string & filename) const
+void OccupancyGrid::ThresholdPixelValue(uint8_t & pixel, const uint8_t free_threshold)
+{
+  pixel = (pixel <= free_threshold) ? CellOccupancyLevel::FREE : CellOccupancyLevel::OCCUPIED;
+}
+
+void OccupancyGrid::InvertPixelValue(uint8_t & pixel) { pixel = 255 - pixel; }
+
+std::string OccupancyGrid::EnsurePGMExtension(const std::string & filename)
 {
   if (filename.size() >= 4 && filename.compare(filename.size() - 4, 4, ".pgm") == 0) {
     return filename;

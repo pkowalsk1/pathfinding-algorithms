@@ -29,23 +29,19 @@ int main(int argc, char * argv[])
   Node start = {start_x, start_y};
   Node goal = {goal_x, goal_y};
 
-  AStar a_star = AStar(map, std::make_unique<EuclideanHeuristic>());
-  std::vector<Node> path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("../results/euclidean_optimal_solution.pgm");
+  AStar a_star = AStar(std::make_unique<EuclideanHeuristic>());
+
+  std::vector<Node> path = a_star.FindPath(
+    map, start, goal, "../results/euclidean_best_solution.pgm");
 
   a_star.SetHeuristic(std::make_unique<ManhattanHeuristic>());
-  a_star.SetMovementCost(1.0);
-  path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("../results/manhattan_optimal_solution.pgm");
+  path = a_star.FindPath(map, start, goal, "../results/manhattan_best_solution.pgm");
 
-  a_star.AllowNearOptimalSolution(true);
-  path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("../results/manhattan_near_optimal_solution.pgm");
+  a_star.SetNearOptimalSolution(true);
+  path = a_star.FindPath(map, start, goal, "../results/manhattan_high_quality_solution.pgm");
 
   a_star.SetHeuristic(std::make_unique<EuclideanHeuristic>());
-  a_star.SetMovementCost(0.7);
-  path = a_star.FindPath(start, goal);
-  a_star.SaveSummaryAsPGM("../results/euclidean_near_optimal_solution.pgm");
+  path = a_star.FindPath(map, start, goal, "../results/euclidean_high_quality_solution.pgm");
 
   return 0;
 }
