@@ -36,7 +36,7 @@
 
 - `void SetHeuristic(std::unique_ptr<Heuristic> new_h)`: Sets the heuristic used in the algorithm.
 
-- `void AllowNearOptimalSolution(const bool allow)`: Sets whether to allow near-optimal solution.
+- `void AllowNearOptimalSolution(const bool allow)`: Configures the algorithm to accept near-optimal solutions. Refer to the `allow_near_optimal_solution_` documentation for additional information.
 
 #### Private Members
 

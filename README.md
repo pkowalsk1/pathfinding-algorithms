@@ -27,6 +27,8 @@ Alternatively, you can use a different map and start/end points:
 
 ## Results
 
+The primary objective of this task is to implement an optimal pathfinding algorithm. However, to reduce execution time, a near-optimal upgrade is available. When enabled, the algorithm will bypass previously checked nodes, significantly reducing computation time. However, this does not guarantee an optimal solution as the algorithm will cease to explore other paths once it finds a path to the goal. The resulting solution will be near-optimal at worst, but generally satisfactory.
+
 | Method                          | Execution Time (ms) | Nodes Inspected | Result File                                                                               |
 | ------------------------------- | ------------------- | --------------- | ----------------------------------------------------------------------------------------- |
 | Euclidean Optimal Solution      | 38557               | 4634297         | [its_euclidean_optimal_solution.pgm](./docs/its_euclidean_optimal_solution.pgm)           |
