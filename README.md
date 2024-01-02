@@ -9,7 +9,7 @@ To use this project, follow these steps to build it:
 ```bash
 mkdir build
 
-# If you don't need to build the tests, you can leave the BUILD_TESTING flag unset.
+# If you don't need to build the tests, you can omit the BUILD_TESTING flag.
 cmake -S . -B ./build -DBUILD_TESTING=ON 
 
 make -C ./build
@@ -25,7 +25,15 @@ cd ./build
 Alternatively, you can use a different map and start/end points:
 
 ```bash
+cd ./build
 ./task_1 "../maps/its.pgm" 100 300 3400 1500
+```
+
+If you have previously built the tests, you can run them by navigating to the build directory and executing the `ctest` command:
+
+```bash
+cd ./build
+ctest
 ```
 
 ## Code Structure & Features

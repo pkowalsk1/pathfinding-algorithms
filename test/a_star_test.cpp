@@ -8,7 +8,7 @@ using namespace pathfinding_utils;
 
 TEST(AStarTest, ThrowsWhenStartOrGoalIsOccupied)
 {
-  std::string summary_filename = "./test_map";
+  std::string summary_filename = "./Testing/Temporary/test_map";
 
   std::vector<uint8_t> pixels(100, 0);
   auto start = Node{0, 0};
@@ -47,7 +47,7 @@ TEST(AStarTest, ThrowsWhenStartOrGoalIsOccupied)
 
 TEST(AStarTest, ThrowsWhenNoPath)
 {
-  std::string summary_filename = "./test_map";
+  std::string summary_filename = "./Testing/Temporary/test_map";
 
   std::vector<uint8_t> pixels(100, 0);
   auto map = std::make_shared<OccupancyGrid>(pixels, 10, 10, 255);
@@ -75,7 +75,7 @@ TEST(AStarTest, ThrowsWhenNoPath)
 
 TEST(AStarTest, ReturnsCorrectPath)
 {
-  std::string summary_filename = "./test_map";
+  std::string summary_filename = "./Testing/Temporary/test_map";
 
   std::vector<uint8_t> pixels(100, 0);
   auto map = std::make_shared<OccupancyGrid>(pixels, 10, 10, 255);
