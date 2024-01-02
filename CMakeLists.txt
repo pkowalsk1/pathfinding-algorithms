@@ -10,7 +10,6 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   include(CTest)
 
-  # enable_testing()
   add_executable(${PROJECT_NAME}_test_utils ./test/utils_test.cpp ./src/utils.cpp)
   target_include_directories(${PROJECT_NAME}_test_utils PRIVATE include)
   target_link_libraries(${PROJECT_NAME}_test_utils gtest)
