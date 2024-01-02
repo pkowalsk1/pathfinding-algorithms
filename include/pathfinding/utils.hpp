@@ -263,6 +263,8 @@ public:
 class ManhattanHeuristic : public Heuristic
 {
 public:
+  virtual ~ManhattanHeuristic() = default;
+
   /**
    * @brief Calculates the Manhattan distance heuristic value.
    *
@@ -280,6 +282,8 @@ public:
 class EuclideanHeuristic : public Heuristic
 {
 public:
+  virtual ~EuclideanHeuristic() = default;
+
   /**
    * @brief Calculates the Euclidean distance heuristic value.
    *

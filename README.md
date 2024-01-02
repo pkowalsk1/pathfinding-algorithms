@@ -7,8 +7,11 @@ This repository contains an implementation of the A* search algorithm in C++. Th
 To use this project, follow these steps to build it:
 
 ```bash
-mkdir build && \
-cmake -S . -B ./build && \
+mkdir build
+
+# If you don't need to build the tests, you can leave the BUILD_TESTING flag unset.
+cmake -S . -B ./build -DBUILD_TESTING=ON 
+
 make -C ./build
 ```
 

@@ -54,7 +54,7 @@ public:
     movement_cost_(movement_cost),
     allow_near_optimal_solution_(allow_near_optimal_solution){};
 
-  virtual ~AStar(){};
+  virtual ~AStar() = default;
 
   /**
    * @brief Finds the shortest path from start to goal using the A* algorithm on a given occupancy
